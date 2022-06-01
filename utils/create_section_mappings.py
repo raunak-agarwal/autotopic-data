@@ -2,6 +2,7 @@ import mwparserfromhell
 import json
 import pandas as pd
 import stanza
+from ftfy import fix_text
 # stanza.download('en')
 
 nlp = stanza.Pipeline(lang='en', processors='tokenize')
@@ -37,8 +38,7 @@ def create_passages_for_subsection(subsection_doc):
             continue
         if s.startswith("==== "):
             subsubsection_label = s.replace("====", "").strip()
-            continue       
-        
+            continue              
         if s:
             tmp.append(s)
     
@@ -54,19 +54,21 @@ def create_passages_for_subsection(subsection_doc):
             for sentence in sentences:
                 passage = passage + " " + sentence.text 
                 if len(passage.split()) > 256:
+                    passage = fix_text(passage)
                     passages.append(passage.strip())
                     passage = ""
             if passage.strip():
+                passage = fix_text(passage)
                 passages.append(passage.strip())
         else:
-            passages.append(s)       
+            passages.append(fix_text(s))       
     return passages, subsection_label, subsubsection_label
 
 def map_passages_for_section(article_name, section_name, section_doc):
     subsections = parse_section(section_doc)
     for s in subsections:
         mapping_string = article_name + " " + section_name
-        passages = create_passages_for_subsection(s)
-        subsection = 
+        passages, subsection, subsubsection = create_passages_for_subsection(s)
+        
         
     

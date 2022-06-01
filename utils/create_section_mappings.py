@@ -106,3 +106,30 @@ def map_passages_for_section(article_name, section_name, section_doc):
         pairs.extend(tmp1)
         
     return pairs
+
+
+
+# tmp = pd.DataFrame(data, columns=['a','b','c'])
+
+not_allowed = ['Introduction', 'See also', 'Notes', \
+               'References', 'Further reading', 'External links', \
+               'Sources', 'Overview']
+
+n = 'Hinduism'
+pairs = pd.DataFrame()
+
+#Islam
+# m = 4
+# print(df.loc[n].page)
+# print(df.loc[n].sections)
+# df.loc[n].sections[m]
+
+for text, section in zip(df.loc[n].text, df.loc[n].sections):
+    if section in not_allowed:
+        section = ""
+    tmp = pd.DataFrame(map_passages_for_section(n,section, t), columns=["text", "category"])
+    pairs = pd.concat([pairs, tmp], ignore_index=True)
+    
+pairs['length'] = pairs.text.apply(lambda x: len(x.split()))
+# pairs
+pairs.drop_duplicates()

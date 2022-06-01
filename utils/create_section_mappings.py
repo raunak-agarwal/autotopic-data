@@ -67,9 +67,24 @@ def create_passages_for_subsection(subsection_doc):
 def map_passages_for_section(article_name, section_name, section_doc):
     subsections = parse_section(section_doc)
     for s in subsections:
+
+        prev_subsection = ""
+        prev_subsubsection = ""
+
         mapping_string = article_name + " " + section_name
         passages, subsection, subsubsection = create_passages_for_subsection(s)
 
-        
-        
-    
+        if subsection and subsubsection:
+            mapping_string = article_name + " " + section_name + " " + subsection + " " + subsubsection
+
+        if subsection and not subsubsection:
+            mapping_string = article_name + " " + section_name + " " + subsection + " " + subsubsection
+
+        if not subsection and subsubsection:
+            mapping_string = article_name + " " + section_name + " " + prev_subsection + " " + subsubsection
+
+        if not subsection and not subsubsection:
+            mapping_string = article_name + " " + section_name + " " + prev_subsection + " " + prev_subsubsection
+
+        prev_subsection = subsection
+        prev_subsubsection = subsubsection

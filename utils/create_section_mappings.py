@@ -22,8 +22,8 @@ with open(path+'enwiki-latest.json', encoding='utf-8') as f:
             print(i)
             
             
-def parse_section(section_doc):
-    parsed = mwparserfromhell.parse(section_doc)
+def parse_section(doc):
+    parsed = mwparserfromhell.parse(doc)
     subsections = parsed.get_sections(flat=True, include_lead=True)
     return subsections
 
@@ -44,7 +44,7 @@ def create_passages_for_subsection(subsection_doc):
     
     for s in tmp:
         split = s.split()
-        if len(split) < 6:
+        if len(split) < 4:
             continue
         
         if len(split) > 256:
@@ -61,30 +61,48 @@ def create_passages_for_subsection(subsection_doc):
                 passage = fix_text(passage)
                 passages.append(passage.strip())
         else:
-            passages.append(fix_text(s))       
+            passages.append(fix_text(s))  
+#     print(passages)
     return passages, subsection_label, subsubsection_label
 
 def map_passages_for_section(article_name, section_name, section_doc):
     subsections = parse_section(section_doc)
-    for s in subsections:
-
-        prev_subsection = ""
-        prev_subsubsection = ""
+    pairs = []
+    prev_subsection = ""
+    prev_subsubsection = ""
+    for i, s in enumerate(subsections):
+        
+        tmp0 = []
+        tmp1 = []
 
         mapping_string = article_name + " " + section_name
         passages, subsection, subsubsection = create_passages_for_subsection(s)
+        
+        if i > 0:
 
-        if subsection and subsubsection:
-            mapping_string = article_name + " " + section_name + " " + subsection + " " + subsubsection
+            if subsection and subsubsection:
+                mapping_string = article_name + " " + section_name + " " + subsection + " " + subsubsection
 
-        if subsection and not subsubsection:
-            mapping_string = article_name + " " + section_name + " " + subsection + " " + subsubsection
+            if subsection and not subsubsection:
+                mapping_string = article_name + " " + section_name + " " + subsection + " " + subsubsection
 
-        if not subsection and subsubsection:
-            mapping_string = article_name + " " + section_name + " " + prev_subsection + " " + subsubsection
+            if not subsection and subsubsection:
+                mapping_string = article_name + " " + section_name + " " + prev_subsection + " " + subsubsection
 
-        if not subsection and not subsubsection:
-            mapping_string = article_name + " " + section_name + " " + prev_subsection + " " + prev_subsubsection
+            if not subsection and not subsubsection:
+                mapping_string = article_name + " " + section_name + " " + prev_subsection + " " + prev_subsubsection
+                
+        else:
+            tmp0 = list(zip(passages, [mapping_string.strip()]*len(passages)))
+            print(tmp0)
+
 
         prev_subsection = subsection
         prev_subsubsection = subsubsection
+        
+        tmp1 = list(zip(passages, [mapping_string.strip()]*len(passages)))
+#         print(tmp)
+        pairs.extend(tmp0)
+        pairs.extend(tmp1)
+        
+    return pairs

@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import stanza
 from ftfy import fix_text
+import re
 # stanza.download('en')
 
 nlp = stanza.Pipeline(lang='en', processors='tokenize')
@@ -44,7 +45,7 @@ def create_passages_for_subsection(subsection_doc):
     
     for s in tmp:
         split = s.split()
-        if len(split) < 4:
+        if len(re.findall(r"[A-Za-z]+", str(split))) < 3:
             continue
         
         if len(split) > 256:
@@ -71,7 +72,7 @@ def map_passages_for_section(article_name, section_name, section_doc):
     prev_subsection = ""
     prev_subsubsection = ""
     for i, s in enumerate(subsections):
-        
+#         print(i)
         tmp0 = []
         tmp1 = []
 
@@ -94,7 +95,7 @@ def map_passages_for_section(article_name, section_name, section_doc):
                 
         else:
             tmp0 = list(zip(passages, [mapping_string.strip()]*len(passages)))
-            print(tmp0)
+#             print(tmp0)
 
 
         prev_subsection = subsection
@@ -109,13 +110,12 @@ def map_passages_for_section(article_name, section_name, section_doc):
 
 
 
-# tmp = pd.DataFrame(data, columns=['a','b','c'])
 
 not_allowed = ['Introduction', 'See also', 'Notes', \
                'References', 'Further reading', 'External links', \
                'Sources', 'Overview']
 
-n = 'Hinduism'
+name = 'Hinduism' #article name
 pairs = pd.DataFrame()
 
 #Islam
@@ -124,10 +124,10 @@ pairs = pd.DataFrame()
 # print(df.loc[n].sections)
 # df.loc[n].sections[m]
 
-for text, section in zip(df.loc[n].text, df.loc[n].sections):
+for text, section in zip(df.loc[name].text, df.loc[name].sections):
     if section in not_allowed:
         section = ""
-    tmp = pd.DataFrame(map_passages_for_section(n,section, t), columns=["text", "category"])
+    tmp = pd.DataFrame(map_passages_for_section(name, section, text), columns=["text", "category"])
     pairs = pd.concat([pairs, tmp], ignore_index=True)
     
 pairs['length'] = pairs.text.apply(lambda x: len(x.split()))

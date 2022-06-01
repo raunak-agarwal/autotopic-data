@@ -27,6 +27,7 @@ dependencies:
     - charset-normalizer==2.0.12
     - emoji==1.7.0
     - filelock==3.7.1
+    - ftfy==6.1.1
     - gensim==4.2.0
     - huggingface-hub==0.7.0
     - idna==3.3
@@ -51,4 +52,5 @@ dependencies:
     - transformers==4.19.2
     - typing-extensions==4.2.0
     - urllib3==1.26.9
+    - wcwidth==0.2.5
 prefix: /home/users/ragarwal/miniconda3/envs/autotopic-data

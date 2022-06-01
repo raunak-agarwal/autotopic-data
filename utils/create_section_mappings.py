@@ -30,8 +30,8 @@ def parse_section(section_doc):
 def create_passages_for_subsection(subsection_doc):
     passages = []
     tmp = []
-    subsection_label = None
-    subsubsection_label = None
+    subsection_label = ""
+    subsubsection_label = ""
     for s in subsection_doc.split("\n"):
         if s.startswith("=== "):
             subsection_label = s.replace("===", "").strip()
@@ -69,6 +69,7 @@ def map_passages_for_section(article_name, section_name, section_doc):
     for s in subsections:
         mapping_string = article_name + " " + section_name
         passages, subsection, subsubsection = create_passages_for_subsection(s)
+
         
         
     

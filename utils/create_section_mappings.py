@@ -22,7 +22,6 @@ with open(path+'enwiki-latest.json', encoding='utf-8') as f:
         if not i % 500000:
             print(i)
             
-            
 def parse_section(doc):
     parsed = mwparserfromhell.parse(doc)
     subsections = parsed.get_sections(flat=True, include_lead=True)
@@ -41,7 +40,7 @@ def create_passages_for_subsection(subsection_doc):
             subsubsection_label = s.replace("====", "").strip()
             continue              
         if s:
-            tmp.append(s)
+            tmp.append(s.strip())
     
     for s in tmp:
         split = s.split()
@@ -107,9 +106,6 @@ def map_passages_for_section(article_name, section_name, section_doc):
         pairs.extend(tmp1)
         
     return pairs
-
-
-
 
 not_allowed = ['Introduction', 'See also', 'Notes', \
                'References', 'Further reading', 'External links', \

@@ -22,6 +22,13 @@ with open(path+'enwiki-latest.json', encoding='utf-8') as f:
         if not i % 500000:
             print(i)
             
+def drop_this(text):
+    l = [r"* . (Audio Version, Text)"]
+    if text in l:
+        return True
+    return False
+
+
 def parse_section(doc):
     parsed = mwparserfromhell.parse(doc)
     subsections = parsed.get_sections(flat=True, include_lead=True)
@@ -33,12 +40,12 @@ def create_passages_for_subsection(subsection_doc):
     subsection_label = ""
     subsubsection_label = ""
     for s in subsection_doc.split("\n"):
-        if s.startswith("=== "):
-            subsection_label = s.replace("===", "").strip()
-            continue
-        if s.startswith("==== "):
+        if s.startswith("===="):
             subsubsection_label = s.replace("====", "").strip()
-            continue              
+            continue  
+        if s.startswith("==="):
+            subsection_label = s.replace("===", "").strip()
+            continue            
         if s:
             tmp.append(s.strip())
     
@@ -49,20 +56,29 @@ def create_passages_for_subsection(subsection_doc):
         
         if len(split) > 256:
             stanza_doc = nlp(s)
-            sentences = stanza_doc.sents
-            passage = ""
-            for sentence in sentences:
-                passage = passage + " " + sentence.text 
-                if len(passage.split()) > 256:
-                    passage = fix_text(passage)
-                    passages.append(passage.strip())
-                    passage = ""
+            try:
+                sentences = stanza_doc.sents
+                passage = ""
+                for sentence in sentences:
+                    passage = passage + " " + sentence.text 
+                    if len(passage.split()) > 256:
+                        passage = fix_text(passage)
+                        passages.append(passage.strip())
+                        passage = ""
+            except AttributeError as e:
+                passage = fix_text(s).strip() #buggy
+                passages.append(passage)
+                passage = ""
+                
             if passage.strip():
                 passage = fix_text(passage)
                 passages.append(passage.strip())
         else:
             passages.append(fix_text(s))  
 #     print(passages)
+    
+    passages = [p for p in passages if not drop_this(p)] #buggy
+    
     return passages, subsection_label, subsubsection_label
 
 def map_passages_for_section(article_name, section_name, section_doc):
@@ -76,6 +92,8 @@ def map_passages_for_section(article_name, section_name, section_doc):
         tmp1 = []
 
         mapping_string = article_name + " " + section_name
+        mapping_string = mwparserfromhell.parse(mapping_string).filter()[0]
+        
         passages, subsection, subsubsection = create_passages_for_subsection(s)
         
         if i > 0:
@@ -100,6 +118,7 @@ def map_passages_for_section(article_name, section_name, section_doc):
         prev_subsection = subsection
         prev_subsubsection = subsubsection
         
+        mapping_string = mwparserfromhell.parse(mapping_string).filter()[0]
         tmp1 = list(zip(passages, [mapping_string.strip()]*len(passages)))
 #         print(tmp)
         pairs.extend(tmp0)
